@@ -29,7 +29,7 @@ public class FileManager {
 	private static final Logger logger = LogManager.getLogger(FileManager.class);
 	
 	private BigInteger[] replicafiles;							// array stores replicated files for distribution to matching nodes
-	private int numReplicas;									// let's assume each node manages nfiles (5 for now) - can be changed from the constructor
+	private int numReplicas;								    // let's assume each node manages nfiles (5 for now) - can be changed from the constructor
 	private NodeInterface chordnode;
 	private String filepath; 									// absolute filepath
 	private String filename;									// only filename without path and extension
@@ -59,12 +59,21 @@ public class FileManager {
 	public void createReplicaFiles() {
 	 	
 		// set a loop where size = numReplicas
+		numReplicas = Util.numReplicas;
+		replicafiles = new BigInteger[numReplicas];
+
+		for(int i = 0; i < numReplicas; i++) {
 		
 		// replicate by adding the index to filename
+		String replicaName = filename + i;
 		
 		// hash the replica
-		
+		BigInteger replicaHash = Hash.hashOf(replicaName);
+
 		// store the hash in the replicafiles array.
+		replicafiles[i] = replicaHash;
+			
+		}
 	}
 	
     /**
