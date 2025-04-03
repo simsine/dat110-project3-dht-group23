@@ -59,7 +59,6 @@ public class FileManager {
 	public void createReplicaFiles() {
 	 	
 		// set a loop where size = numReplicas
-		numReplicas = Util.numReplicas;
 		replicafiles = new BigInteger[numReplicas];
 
 		for(int i = 0; i < numReplicas; i++) {

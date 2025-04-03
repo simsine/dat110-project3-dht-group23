@@ -15,8 +15,9 @@ import org.apache.logging.log4j.Logger;
 import no.hvl.dat110.middleware.Message;
 import no.hvl.dat110.middleware.Node;
 import no.hvl.dat110.rpc.interfaces.NodeInterface;
-import no.hvl.dat110.util.Hash;
 import no.hvl.dat110.util.Util;
+import static no.hvl.dat110.util.Util.checkInterval;
+import static no.hvl.dat110.util.Util.getProcessStub;
 
 /**
  * @author tdoy
@@ -32,19 +33,29 @@ public class ChordLookup {
 	}
 	
 	public NodeInterface findSuccessor(BigInteger key) throws RemoteException {
+		BigInteger nodeID = node.getNodeID();
+		
 		// ask this node to find the successor of key
 		
 		// get the successor of the node
-		
+		NodeInterface successsor = node.getSuccessor();
+		BigInteger succID = successsor.getNodeID();
+
 		// check that key is a member of the set {nodeid+1,...,succID} i.e. (nodeid+1 <= key <= succID) using the checkInterval
-		
+		if (Util.checkInterval(key, nodeID.add(BigInteger.ONE), succID)) {
 		// if logic returns true, then return the successor
-		
+			return successsor;
+
+		} else {
+
 		// if logic returns false; call findHighestPredecessor(key)
-		
+			NodeInterface highestPredecessor = findHighestPredecessor(key);
+
 		// do highest_pred.findSuccessor(key) - This is a recursive call until logic returns true
-				
-		return null;					
+
+			return highestPredecessor.findSuccessor(key);
+
+		}							
 	}
 	
 	/**
@@ -56,16 +67,31 @@ public class ChordLookup {
 	private NodeInterface findHighestPredecessor(BigInteger ID) throws RemoteException {
 		
 		// collect the entries in the finger table for this node
-		
+		List<NodeInterface> fingerTable = node.getFingerTable();
+		BigInteger nodeID = node.getNodeID();
+
 		// starting from the last entry, iterate over the finger table
-		
-		// for each finger, obtain a stub from the registry
-		
-		// check that finger is a member of the set {nodeID+1,...,ID-1} i.e. (nodeID+1 <= finger <= key-1) using the ComputeLogic
-		
-		// if logic returns true, then return the finger (means finger is the closest to key)
-		
-		return (NodeInterface) node;			
+		for(int i = fingerTable.size() - 1; i >= 0; i--) {
+			NodeInterface finger = fingerTable.get(i);
+
+			// for each finger, obtain a stub from the registry
+
+			NodeInterface stub = getProcessStub(finger.getNodeName(), finger.getPort());
+
+			if(stub != null) {
+				BigInteger fingerID = stub.getNodeID();
+	
+			// check that finger is a member of the set {nodeID+1,...,ID-1} i.e. (nodeID+1 <= finger <= key-1) using the ComputeLogic
+			if (checkInterval(fingerID, nodeID.add(BigInteger.ONE), ID.subtract(BigInteger.ONE))) {	
+				
+				// if logic returns true, then return the finger (means finger is the closest to key)
+				return stub;
+			}
+			} 
+		}
+	
+		return (NodeInterface) node;	
+			
 	}
 	
 	public void copyKeysFromSuccessor(NodeInterface succ) {
@@ -96,7 +122,7 @@ public class ChordLookup {
 			logger.info("Finished copying file keys from successor "+ succ.getNodeName()+" to "+node.getNodeName());
 		} catch (RemoteException e) {
 			logger.error(e.getMessage());
-		}
+		}	
 	}
 
 	public void notify(NodeInterface pred_new) throws RemoteException {
