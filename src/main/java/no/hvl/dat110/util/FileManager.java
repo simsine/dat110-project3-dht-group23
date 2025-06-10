@@ -1,6 +1,5 @@
 package no.hvl.dat110.util;
 
-
 /**
  * @author tdoy
  * dat110 - project 3
@@ -65,6 +64,12 @@ public class FileManager {
 		// hash the replica
 		
 		// store the hash in the replicafiles array.
+		
+		for (int i = 0; i < Util.numReplicas; i++) {
+			String replicaFileName = filename + i;
+			BigInteger replicaHash = Hash.hashOf(replicaFileName);
+			this.replicafiles[i] = replicaHash;
+		}
 	}
 	
     /**
