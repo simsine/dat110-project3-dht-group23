@@ -34,6 +34,10 @@ public class ChordLookup {
 	}
 	
 	public NodeInterface findSuccessor(BigInteger key) throws RemoteException {
+		
+		BigInteger nodeID = node.getNodeID();
+		BigInteger succID = node.getSuccessor().getNodeID();
+		
 		// ask this node to find the successor of key
 		
 		// get the successor of the node
@@ -42,7 +46,7 @@ public class ChordLookup {
 		
 		// if logic returns true, then return the successor
 		
-		if (Util.checkInterval(key, node.getNodeID().add(new BigInteger("1")), node.getSuccessor().getNodeID()))
+		if (Util.checkInterval(key, nodeID.add(BigInteger.ONE), succID))
 			return node.getSuccessor();
 
 		// if logic returns false; call findHighestPredecessor(key)
