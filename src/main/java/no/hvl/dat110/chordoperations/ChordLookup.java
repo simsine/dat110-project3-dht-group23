@@ -5,6 +5,8 @@ package no.hvl.dat110.chordoperations;
 
 import java.math.BigInteger;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,11 +42,16 @@ public class ChordLookup {
 		
 		// if logic returns true, then return the successor
 		
+		if (Util.checkInterval(key, node.getNodeID().add(new BigInteger("1")), node.getSuccessor().getNodeID()))
+			return node.getSuccessor();
+
 		// if logic returns false; call findHighestPredecessor(key)
+		
+		NodeInterface highestPred = findHighestPredecessor(key);
 		
 		// do highest_pred.findSuccessor(key) - This is a recursive call until logic returns true
 				
-		return null;					
+		return highestPred.findSuccessor(key);
 	}
 	
 	/**
@@ -53,9 +60,13 @@ public class ChordLookup {
 	 * @return
 	 * @throws RemoteException
 	 */
-	private NodeInterface findHighestPredecessor(BigInteger ID) throws RemoteException {
+	private NodeInterface findHighestPredecessor(BigInteger key) throws RemoteException {
 		
 		// collect the entries in the finger table for this node
+		
+		List<NodeInterface> fingerTable = node.getFingerTable();
+		
+		BigInteger nodeID = node.getNodeID();
 		
 		// starting from the last entry, iterate over the finger table
 		
@@ -63,9 +74,16 @@ public class ChordLookup {
 		
 		// check that finger is a member of the set {nodeID+1,...,ID-1} i.e. (nodeID+1 <= finger <= key-1) using the ComputeLogic
 		
-		// if logic returns true, then return the finger (means finger is the closest to key)
+		for (NodeInterface finger: fingerTable.reversed()) {
+			NodeInterface stub = Util.getProcessStub(finger.getNodeName(), finger.getPort());
+			BigInteger stubID = stub.getNodeID();
+			
+			if (stub != null && Util.checkInterval(stubID, nodeID.add(BigInteger.ONE), key.subtract(BigInteger.ONE)))
+				return finger;
+		}
 		
-		return (NodeInterface) node;			
+		// if logic returns true, then return the finger (means finger is the closest to key)
+		return node;
 	}
 	
 	public void copyKeysFromSuccessor(NodeInterface succ) {

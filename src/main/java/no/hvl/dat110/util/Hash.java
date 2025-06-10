@@ -6,7 +6,6 @@ package no.hvl.dat110.util;
  *
  */
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
