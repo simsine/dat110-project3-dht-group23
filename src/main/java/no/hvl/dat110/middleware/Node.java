@@ -65,7 +65,7 @@ public class Node extends UnicastRemoteObject implements NodeInterface {
 		return nodeID;
 	}
 
-    @Override
+	//@Override
 	public String getNodeName() {
 		
 		return nodename;
